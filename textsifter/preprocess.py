@@ -9,7 +9,7 @@ import re
 
 
 Node = namedtuple('Node', ['surface', 'pos', 'factor'])
-RE_TAG_BODY = re.compile(r'^([0-9]+)\t(.*)$')
+RE_TAG_BODY = re.compile(r'^([0-9]+)\t(.*)?$')
 tagger = MeCab.Tagger()
 
 
@@ -37,7 +37,8 @@ def morpho(text, term_json):
                         "factor": 基本形のリスト
                     },...
                 ]                                                    """
-    tems = {}
+    terms = []
+    di_terms = {}
 
     if term_json:
         terms = json.load(term_json)
@@ -71,7 +72,8 @@ def morpho(text, term_json):
                     t['pos'],
                     frozenset(t['factor'])
                 ))
-                elems.extend(_segment(match.group(2)))
+                if match.group(2):
+                    elems.extend(_segment(match.group(2)))
             else:
                 elems.extend(_segment(e))
 
@@ -87,7 +89,7 @@ def joint_suffix(nodeslist):
         for node in nodes:
             if node.pos.startswith('接尾辞'):
                 if buff:
-                    buff=Node(
+                    buff = Node(
                         f"{buff.surface}{node.surface}",
                         f"{buff.pos} {node.pos}",
                         node.factor | buff.factor)
@@ -97,7 +99,7 @@ def joint_suffix(nodeslist):
                 if buff:
                     line.append(buff)
             buff = node
-        
+
         if buff:
             line.append(buff)
         text.append(line)
@@ -105,7 +107,15 @@ def joint_suffix(nodeslist):
     return text
 
 
-def exclude_stopword(nodeslist, stopword):
+def exclude_stopword(nodeslist, stop_word):
     """ 形態素解析後のnodeslistを検査し、表層形がstopwordに含まれる
-        場合その単語を除外する。stopwordは表層形をスペース区切り
-        形式で保存したものとする。                                    """
+        場合その単語を除外する。stopwordは表層形を一行一単語で
+        保存したものとする。#で始まる行はコメント行として扱う       """
+
+    stopwords = stop_word.readlines()
+    stopwords = {x.strip() for x in stopwords if not x.startswith('#')}
+
+    return [
+        [n for n in nodes if n.surface not in stopwords]
+        for nodes in nodeslist
+    ]

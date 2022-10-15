@@ -37,13 +37,14 @@ def plot(args):
 
 
 def compile(args):
+
     print("Execute markov command")
     print(args)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        prog="textsifter",
+        prog="sifter",
         description='''
             一つまたは複数のテキストファイルを処理し可視化やマルコフ連鎖化を行います。
             テキストファイルが一つの場合一行を共起単位とみなします。
@@ -61,7 +62,7 @@ def main():
     parser.add_argument('-js', '--joint_suffix', action="store_true",
                         help="前処理: 名詞+接尾辞を一つのノードに結合")
     parser.add_argument('-s', '--stopword', type=open,
-                        help='前処理: 指定した語句を解析から除外する。STOPWORDは形態素の表層形をスペース区切りしたもの')
+                        help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
 
     subparsers = parser.add_subparsers()
 
@@ -71,8 +72,15 @@ def main():
     parser_plot.set_defaults(subcommand_func=plot)
 
     # compile - 辞書生成のサブコマンド
-    parser_compile = subparsers.add_parser('compile', help='ファイル出力')
-    parser_compile.add_argument('--foo', type=str, help='foo help')
+    parser_compile = subparsers.add_parser('compile',
+                                           help='ファイル出力')
+    cgroup = parser_compile.add_mutually_exclusive_group()
+    cgroup.add_argument('-f', '--feature', action='store_true',
+                        help="表層+品詞を出力")
+    cgroup.add_argument('-s', '--surface', action='store_true',
+                        help="表層形を出力")
+    parser_compile.add_argument('-c', '--comma', action='store_true',
+                                help="出力をカンマ区切りに(省略時はスペース区切り)")
     parser_compile.set_defaults(subcommand_func=compile)
 
     args = parser.parse_args()
@@ -84,13 +92,16 @@ def main():
     data = squeeze(args.source, args.encoding)
 
     # 前処理
-    if 'morpho' in args or 'term_file' in args or 'joint_suffix' in args:
+    if args.morpho or args.term_file or args.joint_suffix or args.stopword:
         data = preprocess.morpho(data, args.term_file)
-    
-    if 'joint_suffix' in args:
+
+    if args.stopword:
+        data = preprocess.exclude_stopword(data, args.stopword)
+
+    if args.joint_suffix:
         data = preprocess.joint_suffix(data)
 
-    if 'subcommand_func' in args:
+    if args.subcommand_func:
         args.subcommand_func(args)
     else:
         parser.print_help()

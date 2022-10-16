@@ -81,7 +81,7 @@ def morpho(text, term_json):
     return nodeslist
 
 
-def joint_suffix(nodeslist):
+def join_suffix(nodeslist):
     text = []
     buff = None
     for nodes in nodeslist:
@@ -119,3 +119,6 @@ def exclude_stopword(nodeslist, stop_word):
         [n for n in nodes if n.surface not in stopwords]
         for nodes in nodeslist
     ]
+
+def filter():
+    """ セリフ部分のみ、または地の文のみを抽出する"""

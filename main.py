@@ -26,14 +26,14 @@ def squeeze(files, encoding):
         with open(file, encoding=encoding) as f:
             r = f.read()
 
-            data.append(r.replace('\n', '')
-                        )
+            data.append(r.replace('\n', ''))
     return data
 
 
-def plot(args):
-    print("Execute visualize command")
-    print(args)
+def plot(data, args):
+    if 'most_central' in args:
+        from textsifter.plot.most_central import most_central
+        most_central(data, args.mode, args.most_central)
 
 
 def compile(args):
@@ -59,16 +59,19 @@ def main():
                         help="前処理: 形態素解析")
     parser.add_argument('-t', '--term_file', type=open,
                         help="前処理: TERM_FILEで指定した語句をNode化し形態素解析で分割する")
-    parser.add_argument('-js', '--joint_suffix', action="store_true",
+    parser.add_argument('-js', '--join_suffix', action="store_true",
                         help="前処理: 名詞+接尾辞を一つのノードに結合")
     parser.add_argument('-s', '--stopword', type=open,
                         help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
+    parser.add_argument('--mode', choices=['markov','cooccurrence'], default='markov',
+                   help='markov:マルコフ連鎖, cooccurrence:共起性を計算します')
 
     subparsers = parser.add_subparsers()
 
     # plot - 可視化サブコマンド
     parser_plot = subparsers.add_parser('plot', help='可視化')
-    parser_plot.add_argument('--bar', type=str, help='bar help')
+    parser_plot.add_argument('--most_central', type=int, default=argparse.SUPPRESS, nargs='?',
+                             help='次候補が多い順に MOST_CENTRAL 個のノードとその内容を表示します。0以下の値を指定すると全表示します')
     parser_plot.set_defaults(subcommand_func=plot)
 
     # compile - 辞書生成のサブコマンド
@@ -85,24 +88,25 @@ def main():
 
     args = parser.parse_args()
 
-    print(args)
+    mode = "マルコフ連鎖" if args.mode == 'markov' else "共起性"
+    print(f"{mode}を計算します。")
 
     # sourceが複数ファイルなら一ファイルを一行にまとめる
 
     data = squeeze(args.source, args.encoding)
 
     # 前処理
-    if args.morpho or args.term_file or args.joint_suffix or args.stopword:
+    if args.morpho or args.term_file or args.join_suffix or args.stopword:
         data = preprocess.morpho(data, args.term_file)
 
     if args.stopword:
         data = preprocess.exclude_stopword(data, args.stopword)
 
-    if args.joint_suffix:
-        data = preprocess.joint_suffix(data)
+    if args.join_suffix:
+        data = preprocess.join_suffix(data)
 
     if args.subcommand_func:
-        args.subcommand_func(args)
+        args.subcommand_func(data, args)
     else:
         parser.print_help()
         print(parser_plot.print_help())

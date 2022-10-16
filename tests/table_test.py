@@ -1,11 +1,12 @@
 import unittest
 from textsifter import preprocess
+from textsifter.plot.most_central import most_central
 import json
 import pprint
 
-class TestTagger(unittest.TestCase):
+class TestTablePlot(unittest.TestCase):
 
-    def test_morpho(self):
+    def test_most_central(self):
         data = []
         with open("demo/lovecraft.txt") as f:
             data = f.readlines()
@@ -14,10 +15,8 @@ class TestTagger(unittest.TestCase):
             data = preprocess.morpho(data,f)
             data = preprocess.join_suffix(data)
         
-        pp = pprint.PrettyPrinter()
-        with open('tests/result.txt', 'wt') as f:
-            f.writelines(pp.pformat(data))
-        
+        most_central(data, "markov", 10)
+
         
 
 if __name__ == '__main__':

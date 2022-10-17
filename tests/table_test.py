@@ -1,6 +1,6 @@
 import unittest
 from textsifter import preprocess
-from textsifter.plot.most_central import most_central
+from textsifter.plot.common_central import common_central
 import json
 import pprint
 
@@ -15,7 +15,7 @@ class TestTablePlot(unittest.TestCase):
             data = preprocess.morpho(data,f)
             data = preprocess.join_suffix(data)
         
-        most_central(data, "markov", 10)
+        common_central(data, "markov", 10)
 
         
 

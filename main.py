@@ -36,9 +36,8 @@ def plot(data, args):
         most_central(data, args.mode, args.most_central)
 
 
-def compile(args):
+def compile(data, args):
 
-    print("Execute markov command")
     print(args)
 
 
@@ -71,7 +70,7 @@ def main():
     # plot - 可視化サブコマンド
     parser_plot = subparsers.add_parser('plot', help='可視化')
     parser_plot.add_argument('--most_central', type=int, default=argparse.SUPPRESS, nargs='?',
-                             help='次候補が多い順に MOST_CENTRAL 個のノードとその内容を表示します。0以下の値を指定すると全表示します')
+                             help='次候補が多い順に指定した数のノードとその内容を表示します。0以下の値を指定すると全表示します')
     parser_plot.set_defaults(subcommand_func=plot)
 
     # compile - 辞書生成のサブコマンド

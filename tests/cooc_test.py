@@ -1,23 +1,20 @@
 import unittest
 from textsifter import preprocess
-import json
-import pprint
+from textsifter.plot import cooc_network
 
-class TestTagger(unittest.TestCase):
+class TestCooc(unittest.TestCase):
 
-    def test_morpho(self):
+    def test_cooc_graph(self):
         data = []
         with open("demo/lovecraft.txt") as f:
             data = f.readlines()
 
         with open('tests/term.json') as f:
             data = preprocess.morpho(data,f)
-            # data = preprocess.join_suffix(data)
+            data = preprocess.join_suffix(data)
         
-        pp = pprint.PrettyPrinter()
-        with open('tests/result.txt', 'wt') as f:
-            f.writelines(pp.pformat(data))
-        
+        cooc_network.cooccurrence_network(data, 10)
+
         
 
 if __name__ == '__main__':

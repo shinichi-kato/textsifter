@@ -28,7 +28,7 @@ def common_central(nodeslist, mode, top_most):
         elif node == 'cooccurrence':
             df = _node_cooccurrence(nodeslist)
 
-    # elif isinstance(node, str):
+    # elif isinstance(node, str):W
 
     """ top_mostのスライス"""
 
@@ -38,6 +38,9 @@ def common_central(nodeslist, mode, top_most):
 
     if top_most > 0:
         df = df.head(top_most)
+
+    """ リスト表示 """
+    print(df)
 
     """ 散布図描画 """
 

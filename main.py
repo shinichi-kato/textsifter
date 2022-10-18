@@ -31,9 +31,9 @@ def squeeze(files, encoding):
 
 
 def plot(data, args):
-    if 'most_central' in args:
-        from textsifter.plot.most_central import most_central
-        most_central(data, args.mode, args.most_central)
+    if 'common_central' in args:
+        from textsifter.plot.common_central import common_central
+        common_central(data, args.mode, args.common_central)
 
 
 def compile(data, args):
@@ -69,8 +69,10 @@ def main():
 
     # plot - 可視化サブコマンド
     parser_plot = subparsers.add_parser('plot', help='可視化')
-    parser_plot.add_argument('--most_central', type=int, default=argparse.SUPPRESS, nargs='?',
-                             help='次候補が多い順に指定した数のノードとその内容を表示します。0以下の値を指定すると全表示します')
+    parser_plot.add_argument('--common_central', type=int, default=argparse.SUPPRESS, nargs='?',
+                             help='ノードの頻度-次数プロットを表示します。0以下の値を指定すると全表示します')
+    parser_plot.add_argument('--network', type=int, default=argparse.SUPPRESS, nargs='?',
+        help='指定した数のノードを')
     parser_plot.set_defaults(subcommand_func=plot)
 
     # compile - 辞書生成のサブコマンド

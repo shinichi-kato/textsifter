@@ -12,6 +12,8 @@ class TestCooc(unittest.TestCase):
         with open('tests/term.json') as f:
             data = preprocess.morpho(data,f)
             data = preprocess.join_suffix(data)
+            data = preprocess.join_kakujoshi(data)
+            cooc_network.mk_node2name(data)
         
         cooc_network.cooccurrence_network(data, 10)
 

@@ -34,6 +34,10 @@ def plot(data, args):
     if 'common_central' in args:
         from textsifter.plot.common_central import common_central
         common_central(data, args.mode, args.common_central)
+    elif 'network' in args:
+        if args.mode == 'cooccurrence':
+            from textsifter.plot.cooc_network import cooccurrence_network
+            cooccurrence_network(data, args.network)
 
 
 def compile(data, args):
@@ -58,8 +62,8 @@ def main():
                         help="前処理: 形態素解析")
     parser.add_argument('-t', '--term_file', type=open,
                         help="前処理: TERM_FILEで指定した語句をNode化し形態素解析で分割する")
-    parser.add_argument('-js', '--join_suffix', action="store_true",
-                        help="前処理: 名詞+接尾辞を一つのノードに結合")
+    parser.add_argument('-ff', '--fix_fragment', action="store_true",
+                        help="前処理: 名詞+接尾辞、名詞+格助詞を一つのノードに結合")
     parser.add_argument('-s', '--stopword', type=open,
                         help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
     parser.add_argument('--mode', choices=['markov','cooccurrence'], default='markov',
@@ -97,14 +101,15 @@ def main():
     data = squeeze(args.source, args.encoding)
 
     # 前処理
-    if args.morpho or args.term_file or args.join_suffix or args.stopword:
+    if args.morpho or args.term_file or args.fix_fragment or args.stopword:
         data = preprocess.morpho(data, args.term_file)
 
     if args.stopword:
         data = preprocess.exclude_stopword(data, args.stopword)
 
-    if args.join_suffix:
+    if args.fix_fragment:
         data = preprocess.join_suffix(data)
+        data = preprocess.join_kakujoshi(data)
 
     if args.subcommand_func:
         args.subcommand_func(data, args)

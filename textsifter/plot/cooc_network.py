@@ -5,35 +5,36 @@ import itertools
 import numpy as np
 from scipy.spatial.distance import cdist
 import networkx as nx
-from collections import Counter, defaultdict
+from collections import Counter
 import matplotlib.pyplot as plt
 import pandas as pd
 import matplotlib
 
 from textsifter.preprocess import Node
+from textsifter.plot.font import FONT_FAMILY
 
 matplotlib.use('TkAgg')
 
 
 def cooccurrence_network(nodeslist, top_most):
     """ 単語頻度 """
-    counts = Counter([node for nodes in nodeslist for node in nodes])
-    counts = counts.most_common()
+    commons = Counter([node for nodes in nodeslist for node in nodes])
+    counts = commons.most_common()
 
     """ top_mostで足切り """
     top_most = top_most or 10
     if top_most <= 0:
-        counts = counts[:top_most]
+        commons = commons[:top_most]
 
     """ jaccard距離 """
-    vocab = [x[0] for x in counts]
+    vocab = [x[0] for x in commons]
     r_vocab = {node: index for index, node in enumerate(vocab)}
     size = len(vocab)
     cooc_mtx = np.zeros((size, size))
 
     for nodes in nodeslist:
-        pairs = list(itertools.combinations(nodes, 2)
-                     ) if len(nodes) >= 2 else []
+        pairs = itertools.combinations(nodes, 2)
+                      if len(nodes) >= 2 else []
         for x, y in pairs:
             cooc_mtx[r_vocab[x], r_vocab[y]] += 1
 
@@ -44,27 +45,40 @@ def cooccurrence_network(nodeslist, top_most):
     """ グラフ化 """
     nodename = mk_node2name(nodeslist)
     with matplotlib.rc_context({
-        'font.family': 'Noto Sans CJK JP'
+        'font.family': FONT_FAMILY
     }):
         G = nx.Graph()
         for node in vocab:
             G.add_node(
-                nodename.get(node, node.surface),
+                nodename.get(node, node.surface), count=counts[node]
                 )
         
         for x in range(size):
             x_name = nodename[vx] if (vx:=vocab[x]) in nodename else vx.surface
             for y in range(x):
-                y_name = nodename[vy] if (vy:=vocab[y]) in nodename else vy.surface
-                G.add_edge(
-                    x_name,y_name,
-                    weight=jac_dist[x,y],
-                    )
+                weight = jac_dist[x,y]
+                if weight>0:
+                    y_name = nodename[vy] if (vy:=vocab[y]) in nodename else vy.surface
+                    G.add_edge(
+                        x_name,y_name,
+                        weight=weight,
+                        )
+        
+        width = [d['weight']*10 for (u, v, d) in G.edges(data=True)]
+        node_color = np.fromiter(nx.degree_centrality(G).values(), float)
+        node_size = [
+            10+(x**0.5)*200 for x in nx.get_node_attributes(G, "count").values()]
+
 
         pos = nx.spring_layout(G, seed=3068)
-        nx.draw_networkx_nodes(G, pos=pos )
-        nx.draw_networkx_labels(G, pos=pos, font_family='Noto Sans CJK JP')
-        nx.draw_networkx_edges(G, pos=pos, alpha=0.2)
+        nx.draw_networkx_nodes(G, pos,
+                               node_color=node_color, cmap=plt.cm.summer, node_size=node_size)
+        nx.draw_networkx_labels(G, pos,
+                                font_size=12,
+                                font_family=FONT_FAMILY)
+        nx.draw_networkx_edges(G, pos=pos, alpha=0.2,
+                               edge_color='#332300', width=width)
+        plt.axis('off')
         plt.show()
 
 
@@ -93,6 +107,9 @@ def mk_node2name(nodeslist):
     """ factorが同一でsurfaceが異なるnode """
     dff = df[df.duplicated('factor',keep=False)]
     for row in dff.itertuples():
-        node2name[Node(row.surface,row.pos,row.factor)] = f'{row.surface}({"-".join(row.factor)})'
+        factors = [row.factor[-1]]
+        if len(row.factor) == 2:
+            factors.extend(list(row.factor[0]))
+        node2name[Node(row.surface,row.pos,row.factor)] = f'{row.surface}({"-".join(factors)})'
     
     return node2name

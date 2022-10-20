@@ -76,7 +76,7 @@ def main():
     parser_plot.add_argument('--common_central', type=int, default=argparse.SUPPRESS, nargs='?',
                              help='ノードの頻度-次数プロットを表示します。0以下の値を指定すると全表示します')
     parser_plot.add_argument('--network', type=int, default=argparse.SUPPRESS, nargs='?',
-        help='指定した数のノードを')
+        help='マルコフ連鎖または共起のネットワークを表示します。次数が上位X件のエッジに限定します')
     parser_plot.set_defaults(subcommand_func=plot)
 
     # compile - 辞書生成のサブコマンド

@@ -3,3 +3,4 @@ unidic-lite
 networkx
 matplotlib
 pandas
+scipy

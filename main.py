@@ -58,8 +58,6 @@ def main():
                         help='テキストファイル(複数可能)')
     parser.add_argument('-e', '--encoding', type=str, default="utf-8",
                         help='テキストの文字コードを指定')
-    parser.add_argument('-m', '--morpho', action="store_true",
-                        help="前処理: 形態素解析")
     parser.add_argument('-t', '--term_file', type=open,
                         help="前処理: TERM_FILEで指定した語句をNode化し形態素解析で分割する")
     parser.add_argument('-ff', '--fix_fragment', action="store_true",
@@ -101,8 +99,7 @@ def main():
     data = squeeze(args.source, args.encoding)
 
     # 前処理
-    if args.morpho or args.term_file or args.fix_fragment or args.stopword:
-        data = preprocess.morpho(data, args.term_file)
+    data = preprocess.morpho(data, args.term_file)
 
     if args.stopword:
         data = preprocess.exclude_stopword(data, args.stopword)

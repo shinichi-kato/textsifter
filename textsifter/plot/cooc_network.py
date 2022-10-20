@@ -21,11 +21,6 @@ def cooccurrence_network(nodeslist, top_most):
     counts = Counter([node for nodes in nodeslist for node in nodes])
     commons = counts.most_common()
 
-    # """ top_mostで足切り """
-    # top_most = top_most or 10
-    # if top_most <= 0:
-    #     commons = commons[:top_most]
-
     """ jaccard距離 """
     vocab = [x[0] for x in commons]
     r_vocab = {node: index for index, node in enumerate(vocab)}
@@ -43,7 +38,7 @@ def cooccurrence_network(nodeslist, top_most):
 
     """ jaccard距離のTOP_MOSTで足切り """
      
-    jac_dist = _filter_triu_top(jac_dist, top_most)
+    jac_dist = _filter_tril_top(jac_dist, top_most)
 
     """ グラフ化 """
     nodename = _mk_node2name(nodeslist)
@@ -64,30 +59,33 @@ def cooccurrence_network(nodeslist, top_most):
                 if weight > 0:
                     y_name = nodename[vy] if (
                         vy := vocab[y]) in nodename else vy.surface
-                    print(x_name,y_name,weight)
                     G.add_edge(
                         x_name, y_name,
                         weight=weight,
                     )
 
+        """ 孤立ノードを削除 """
+        G.remove_nodes_from(list(nx.isolates(G)))
+
+        """ デザイン """
         width = [d['weight']*10 for (u, v, d) in G.edges(data=True)]
         node_color = np.fromiter(nx.degree_centrality(G).values(), float)
         node_size = [
-            10+(x**0.5)*200 for x in nx.get_node_attributes(G, "count").values()]
+            10+(x**0.5)*100 for x in nx.get_node_attributes(G, "count").values()]
 
-        pos = nx.spring_layout(G, seed=3068, weight=None)
+        pos = nx.spring_layout(G, seed=3068, k=0.5)
         nx.draw_networkx_nodes(G, pos,
                                node_color=node_color, cmap=plt.cm.summer, node_size=node_size)
         nx.draw_networkx_labels(G, pos,
                                 font_size=10,
                                 font_family=FONT_FAMILY)
         nx.draw_networkx_edges(G, pos=pos, alpha=0.2,
-                               edge_color='#332300', width=width)
+                               edge_color='#edb100', width=width)
         plt.axis('off')
         plt.show()
 
 
-def _filter_triu_top(matrix, top_most):
+def _filter_tril_top(matrix, top_most):
     """ matrixの値の上位top_most件のみをのこし、それ以外を0にして返す """
     if top_most is None:
         top_most=50

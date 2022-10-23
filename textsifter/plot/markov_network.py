@@ -37,47 +37,55 @@ def markov_network(nodeslist, top_most):
     for node in chain:
         dests = Counter(chain[node])
         node_name = nodename.get(node, node.surface)
-        G.add_node(
-            node_name, count=len(dests)
-        )
+        G.add_node(node_name, count=len(dests))
 
         for dest, weight in dests.items():
             dest_name = nodename.get(dest, dest.surface)
             G.add_edge(node_name, dest_name, weight=weight)
-    
+
     """ top_mostで足切り """
 
-    number_of_all_nodes = G.number_of_nodes()
-
+    origin_degs = dict(G.degree())
     if top_most is None:
         top_most = 10
-    if top_most >0:
-        d = np.fromiter(dict(G.degree()).values(),int)
-        limit = np.unique(d,axis=None)[-top_most]
-        to_be_removed=[n for n in G.nodes() if G.degree(n)<limit]
+
+    if top_most > 0:
+        number_of_all_nodes = G.number_of_nodes()
+        d = np.fromiter(origin_degs.values(), int)
+        limit = np.unique(d, axis=None)[-top_most]
+        to_be_removed = [n for n in G.nodes() if G.degree(n) < limit]
         G.remove_nodes_from(to_be_removed)
         view_nodes = G.number_of_nodes()
-        print(f"次数が上位{top_most}番までのnode({number_of_all_nodes}個中{view_nodes}個)を表示します")
-
+        print(
+            f"次数が上位{top_most}番までのnode({number_of_all_nodes}個中{view_nodes}個)を表示します")
 
     """ デザイン """
-    node_color = np.fromiter(nx.degree_centrality(G).values(), float)
-    edge_color = [d['weight']**0.5 for (u, v, d) in G.edges(data=True)]
-    node_size = np.fromiter(nx.get_node_attributes(G, "count").values(), float)
-    node_size = 10+(node_size**0.5)*100
-    edge_cmap = matplotlib.colors.LinearSegmentedColormap.from_list('half',
-        plt.cm.binary(np.linspace(0.3,max(edge_color),256)))
+    with matplotlib.rc_context({
+        'font.family': FONT_FAMILY
+    }):
+        degrees = {n:origin_degs[n] for n in G.nodes()}
+        node_color = np.fromiter(degrees.values(), float)
+        edge_color = [d['weight']**0.5 for (u, v, d) in G.edges(data=True)]
+        node_size = np.fromiter(
+            nx.get_node_attributes(G, "count").values(), float)
+        node_size = 10+(node_size**0.5)*100
+        edge_cmap = matplotlib.colors.LinearSegmentedColormap.from_list('half',
+                                                                        plt.cm.binary(np.linspace(0.3, max(edge_color), 256)))
 
-    pos = nx.spring_layout(G, seed=228270, k=0.5)
-    nx.draw_networkx_nodes(G, pos,
-                           node_color=node_color, cmap=plt.cm.summer, node_size=node_size)
-    nx.draw_networkx_labels(G, pos,
-                            font_size=10,
-                            font_family=FONT_FAMILY)
-    nx.draw_networkx_edges(G, pos, 
-                            edge_color=edge_color, edge_vmin=1, edge_cmap=edge_cmap,
-                            width=1.5,
-                            node_size=node_size)
-    plt.axis('off')
-    plt.show()
+        pos = nx.spring_layout(G, seed=228270, k=0.5)
+        nx.draw_networkx_nodes(G, pos,
+                               node_color=node_color, cmap=plt.cm.summer, node_size=node_size)
+        nx.draw_networkx_labels(G, pos,
+                                font_size=10,
+                                font_family=FONT_FAMILY)
+        nx.draw_networkx_edges(G, pos,
+                               edge_color=edge_color, edge_vmin=1, edge_cmap=edge_cmap,
+                               width=1.5,
+                               node_size=node_size)
 
+        sm = plt.cm.ScalarMappable(cmap=plt.cm.summer,
+                                   norm=plt.Normalize(vmin=node_color.min(), vmax=node_color.max()))
+        sm.set_array([])
+        cbar = plt.colorbar(sm, label="全nodeにおける次数")
+        plt.axis('off')
+        plt.show()

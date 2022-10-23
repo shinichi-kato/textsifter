@@ -67,7 +67,7 @@ def main():
                         help="前処理: 名詞+接尾辞、名詞+格助詞を一つのノードに結合")
     parser.add_argument('-s', '--stopword', type=str,
                         help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
-    parser.add_argument('--mode', choices=['markov', 'cooccurrence'], default='markov',
+    parser.add_argument('--mode', choices=['markov', 'cooccurrence'], default='cooccurrence',
                         help='markov:マルコフ連鎖, cooccurrence:共起性を計算します')
 
     subparsers = parser.add_subparsers()

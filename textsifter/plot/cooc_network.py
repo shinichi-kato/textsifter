@@ -45,6 +45,7 @@ def cooccurrence_network(nodeslist, top_most):
 
     jac_dist = _filter_tril_top(jac_dist, top_most)
 
+
     """ グラフ化 """
     nodename = mk_node2name(nodeslist)
     with matplotlib.rc_context({

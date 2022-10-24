@@ -43,7 +43,18 @@ def cooccurrence_network(nodeslist, top_most):
 
     """ jaccard距離のTOP_MOSTで足切り """
 
-    jac_dist = _filter_tril_top(jac_dist, top_most)
+    jac_distl = np.tril(jac_dist)
+    num_of_edges = np.count_nonzero(jac_distl)
+
+    if top_most is None:
+        top_most = 50
+    if top_most > 0:
+
+        limit = np.unique(jac_distl, axis=None)[-top_most]
+        jac_dist = jac_dist*np.where(jac_distl > limit, 1, 0)
+
+    view_edges = np.count_nonzero(jac_dist)
+    print(f"Jaccard距離が上位{top_most}番までのedge({num_of_edges}本中{view_edges}本)を表示します")
 
 
     """ グラフ化 """
@@ -74,10 +85,12 @@ def cooccurrence_network(nodeslist, top_most):
         G.remove_nodes_from(list(nx.isolates(G)))
 
         """ デザイン """
-        width = [d['weight']*10 for (u, v, d) in G.edges(data=True)]
+        edge_color = [d['weight']*10 for (u, v, d) in G.edges(data=True)]
         node_color = np.fromiter(nx.degree_centrality(G).values(), float)
         node_size = [
             10+(x**0.5)*100 for x in nx.get_node_attributes(G, "count").values()]
+        edge_cmap = matplotlib.colors.LinearSegmentedColormap.from_list('half',
+                                                                        plt.cm.binary(np.linspace(0.2, 0.8, 256)))
 
         pos = nx.spring_layout(G, seed=3068, k=0.5)
         nx.draw_networkx_nodes(G, pos,
@@ -85,8 +98,13 @@ def cooccurrence_network(nodeslist, top_most):
         nx.draw_networkx_labels(G, pos,
                                 font_size=10,
                                 font_family=FONT_FAMILY)
-        nx.draw_networkx_edges(G, pos=pos, alpha=0.2,
-                               edge_color='#edb100', width=width)
+        nx.draw_networkx_edges(G, pos=pos, node_size=node_size,
+                               edge_color=edge_color, edge_cmap=edge_cmap,width=1)
+
+        sm = plt.cm.ScalarMappable(cmap=plt.cm.summer,
+                            norm=plt.Normalize(vmin=node_color.min(), vmax=node_color.max()))
+        sm.set_array([])
+        plt.colorbar(sm, label="全graphにおけるjaccard距離")
         plt.axis('off')
         plt.show()
 

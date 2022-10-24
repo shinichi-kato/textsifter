@@ -86,6 +86,6 @@ def markov_network(nodeslist, top_most):
         sm = plt.cm.ScalarMappable(cmap=plt.cm.summer,
                                    norm=plt.Normalize(vmin=node_color.min(), vmax=node_color.max()))
         sm.set_array([])
-        cbar = plt.colorbar(sm, label="全nodeにおける次数")
+        plt.colorbar(sm, label="全nodeにおける次数")
         plt.axis('off')
         plt.show()

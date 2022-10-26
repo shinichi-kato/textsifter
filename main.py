@@ -12,6 +12,7 @@ main.py
 * 
 
 """
+import sys
 import argparse
 from textsifter import preprocess
 
@@ -43,8 +44,10 @@ def plot(data, args):
             markov_network(data, args.network)
 
 
-def compile(data, args):
-
+def dump(data, args):
+    if args.mode=='cooccurrence':
+        from textsifter.dump.cooc_mtx import cooccurrence_matrix
+        cooccurrence_matrix(data,args)
     print(args)
 
 
@@ -80,17 +83,16 @@ def main():
                              help='マルコフ連鎖または共起のネットワークを表示します。次数が上位X件のエッジに限定します')
     parser_plot.set_defaults(subcommand_func=plot)
 
-    # compile - 辞書生成のサブコマンド
-    parser_compile = subparsers.add_parser('compile',
-                                           help='ファイル出力')
-    cgroup = parser_compile.add_mutually_exclusive_group()
-    cgroup.add_argument('-f', '--feature', action='store_true',
-                        help="表層+品詞を出力")
-    cgroup.add_argument('-s', '--surface', action='store_true',
-                        help="表層形を出力")
-    parser_compile.add_argument('-c', '--comma', action='store_true',
-                                help="出力をカンマ区切りに(省略時はスペース区切り)")
-    parser_compile.set_defaults(subcommand_func=compile)
+    # dump - 辞書生成のサブコマンド
+    parser_dump = subparsers.add_parser('dump',
+                                        help='ファイル出力')
+    parser_dump.add_argument('outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout,
+                             help="出力ファイルのパス(省略時は標準出力)")
+    parser_dump.add_argument('-f', '--format', choices=['surface', 'feature'], default='surface',
+                             help='surface:表層語彙を出力, feature:"表層語彙(品詞)"を出力')
+    parser_dump.add_argument('-s', '--separator', choices=['comma', 'space'], default='space',
+                             help="出力をの区切り文字を指定(省略時はスペース区切り)")
+    parser_dump.set_defaults(subcommand_func=dump)
 
     args = parser.parse_args()
 
@@ -102,7 +104,8 @@ def main():
     data = squeeze(args.source, args.encoding)
 
     # 前処理
-    term_file = open(args.term_file, encoding=args.encoding) if args.term_file else None
+    term_file = open(
+        args.term_file, encoding=args.encoding) if args.term_file else None
     data = preprocess.morpho(data, term_file)
 
     if args.stopword:

@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib
 
 from textsifter.plot import mk_node2name, FONT_FAMILY
+from textsifter.core import cooccurrence
 
 matplotlib.use('TkAgg')
 
@@ -22,24 +23,23 @@ def cooccurrence_network(nodeslist, top_most):
         top_mostで数を指定した場合、edgeのjaccard距離の上位top_most件を表示し、
         孤立したnodeは非表示にする。                                                 """
 
-    """ 単語頻度 """
-    counts = Counter([node for nodes in nodeslist for node in nodes])
-    commons = counts.most_common()
+    # """ 単語頻度 """
+    # counts = Counter([node for nodes in nodeslist for node in nodes])
+    # commons = counts.most_common()
 
-    """ jaccard距離 """
-    vocab = [x[0] for x in commons]
-    r_vocab = {node: index for index, node in enumerate(vocab)}
-    size = len(vocab)
-    cooc_mtx = np.zeros((size, size))
+    # """ jaccard距離 """
+    # vocab = [x[0] for x in commons]
+    # r_vocab = {node: index for index, node in enumerate(vocab)}
+    # size = len(vocab)
+    # cooc_mtx = np.zeros((size, size))
 
-    for nodes in nodeslist:
-        pairs = itertools.combinations(nodes, 2) if len(nodes) >= 2 else []
-        for x, y in pairs:
-            cooc_mtx[r_vocab[x], r_vocab[y]] += 1
+    # for nodes in nodeslist:
+    #     pairs = itertools.combinations(nodes, 2) if len(nodes) >= 2 else []
+    #     for x, y in pairs:
+    #         cooc_mtx[r_vocab[x], r_vocab[y]] += 1
+    cooc = cooccurrence(nodeslist)
 
-    cooc_mtx = (cooc_mtx + cooc_mtx.transpose())/2
-
-    jac_dist = 1-cdist(cooc_mtx, cooc_mtx, 'jaccard')
+    jac_dist = 1-cdist(cooc.matrix, cooc.matrix, 'jaccard')
 
     """ jaccard距離のTOP_MOSTで足切り """
 
@@ -63,19 +63,19 @@ def cooccurrence_network(nodeslist, top_most):
         'font.family': FONT_FAMILY
     }):
         G = nx.Graph()
-        for node in vocab:
+        for node in cooc.vocab:
             G.add_node(
-                nodename.get(node, node.surface), count=counts[node]
+                nodename.get(node, node.surface), count=cooc.counts[node]
             )
 
-        for x in range(size):
+        for x in range(len(cooc.vocab)):
             x_name = nodename[vx] if (
-                vx := vocab[x]) in nodename else vx.surface
+                vx := cooc.vocab[x]) in nodename else vx.surface
             for y in range(x):
                 weight = jac_dist[x, y]
                 if weight > 0:
                     y_name = nodename[vy] if (
-                        vy := vocab[y]) in nodename else vy.surface
+                        vy := cooc.vocab[y]) in nodename else vy.surface
                     G.add_edge(
                         x_name, y_name,
                         weight=weight,

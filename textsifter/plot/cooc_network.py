@@ -11,7 +11,7 @@ import pandas as pd
 import matplotlib
 
 from textsifter.plot import mk_node2name, FONT_FAMILY
-from textsifter.core import cooccurrence
+from textsifter.core.cooccurrence import cooccurrence
 
 matplotlib.use('TkAgg')
 
@@ -49,8 +49,8 @@ def cooccurrence_network(nodeslist, top_most):
     if top_most is None:
         top_most = 50
     if top_most > 0:
-
-        limit = np.unique(jac_distl, axis=None)[-top_most]
+        rank = np.unique(jac_distl, axis=None)
+        limit = rank[-top_most] if len(rank)>top_most else 0.0
         jac_dist = jac_dist*np.where(jac_distl > limit, 1, 0)
 
     view_edges = np.count_nonzero(jac_dist)

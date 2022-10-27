@@ -24,15 +24,15 @@ def mk_node2name(nodeslist):
     dfs = df[df.duplicated('surface', keep=False)]
     for row in dfs.itertuples():
         factors = _squeeze_factor(row.factor)
-        node2name[Node(row.surface, row.pos, row.factor)
-                  ] = f'{row.surface}({"-".join(factors)})'
+        node=Node(row.surface, row.pos, row.factor)
+        node2name[node] = f'{row.surface}({"-".join(factors)})'
 
     """ factorが同一でsurfaceが異なるnode """
     dff = df[df.duplicated('factor', keep=False)]
     for row in dff.itertuples():
         factors = _squeeze_factor(row.factor)
-        node2name[Node(row.surface, row.pos, row.factor)
-                  ] = f'{row.surface}({"-".join(factors)})'
+        node=Node(row.surface, row.pos, row.factor)
+        node2name[node] = f'{row.surface}({"-".join(factors)})'
 
     return node2name
 

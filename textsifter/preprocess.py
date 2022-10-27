@@ -206,6 +206,15 @@ def exclude_stopword(nodeslist, stop_word):
 
 def filter():
     """ セリフ部分のみ、または地の文のみを抽出する"""
+    pass
+
+
+def filter_nva(nodeslist):
+    """ 名詞、動詞、形容詞、形状詞のみを残す """
+    return [
+        [n for n in nodes if n.pos.split('詞',1)[0] in {'名','動','形容','形状'}]
+        for nodes in nodeslist
+    ]
 
 
 def _segment(text):

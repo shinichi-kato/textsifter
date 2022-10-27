@@ -52,7 +52,8 @@ def markov_network(nodeslist, top_most):
     if top_most > 0:
         number_of_all_nodes = G.number_of_nodes()
         d = np.fromiter(origin_degs.values(), int)
-        limit = np.unique(d, axis=None)[-top_most]
+        rank = np.unique(d, axis=None)
+        limit = rank[-top_most] if len(rank)>top_most else 0.0
         to_be_removed = [n for n in G.nodes() if G.degree(n) < limit]
         G.remove_nodes_from(to_be_removed)
         view_nodes = G.number_of_nodes()
@@ -63,7 +64,7 @@ def markov_network(nodeslist, top_most):
     with matplotlib.rc_context({
         'font.family': FONT_FAMILY
     }):
-        degrees = {n:origin_degs[n] for n in G.nodes()}
+        degrees = {n: origin_degs[n] for n in G.nodes()}
         node_color = np.fromiter(degrees.values(), float)
         edge_color = [d['weight']**0.5 for (u, v, d) in G.edges(data=True)]
         node_size = np.fromiter(

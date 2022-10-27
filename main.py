@@ -68,6 +68,8 @@ def main():
                         help="前処理: TERM_FILEで指定した語句をNode化し形態素解析で分割する")
     parser.add_argument('-ff', '--fix_fragment', action="store_true",
                         help="前処理: 名詞+接尾辞、名詞+格助詞を一つのノードに結合")
+    parser.add_argument('-fnva', '--filter_nva', action='store_true',
+                        help='前処理: 名詞,動詞,形容詞,形状詞のみを残す。')
     parser.add_argument('-s', '--stopword', type=str,
                         help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
     parser.add_argument('--mode', choices=['markov', 'cooccurrence'], default='cooccurrence',
@@ -115,6 +117,9 @@ def main():
     if args.fix_fragment:
         data = preprocess.join_suffix(data)
         data = preprocess.join_kakujoshi(data)
+    
+    if args.filter_nva:
+        data = preprocess.filter_nva(data)
 
     if args.subcommand_func:
         args.subcommand_func(data, args)

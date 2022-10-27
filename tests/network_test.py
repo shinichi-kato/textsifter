@@ -16,7 +16,7 @@ class TestNetwork(unittest.TestCase):
         
     def test_cooc_graph(self):
         
-        cooc_network.cooccurrence_network(TestNetwork.data, 10)
+        cooc_network.cooccurrence_network(TestNetwork.data, 50)
 
     def test_markov_graph(self):
         

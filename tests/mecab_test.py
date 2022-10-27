@@ -6,7 +6,7 @@ class TestTagger(unittest.TestCase):
 
     def test_tagger(self):
         tagger = MeCab.Tagger()
-        nodes = tagger.parse("緑の花の咲いた場所に太陽がさした")
+        nodes = tagger.parse("緑の花の咲いた場所に太陽がさした。伊藤さんは車を運転して海へゆく。")
         for node in nodes.split('\n'):
             print(node.split('\t'))
         print("\n")

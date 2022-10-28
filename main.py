@@ -45,10 +45,15 @@ def plot(data, args):
 
 
 def dump(data, args):
+    output = []
     if args.mode=='cooccurrence':
         from textsifter.dump.cooc_mtx import cooccurrence_matrix
-        cooccurrence_matrix(data,args)
-    print(args)
+        output = cooccurrence_matrix(data,args)
+    if args.mode == 'markov':
+        from textsifter.dump.markov_dict import bot_markov_chain
+        output = bot_markov_chain(data, args)
+    
+    args.outfile.writelines(output)
 
 
 def main():

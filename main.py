@@ -15,6 +15,7 @@ main.py
 import sys
 import argparse
 from textsifter import preprocess
+import json
 
 
 def squeeze(files, encoding):
@@ -51,7 +52,9 @@ def dump(data, args):
         output = cooccurrence_matrix(data,args)
     if args.mode == 'markov':
         from textsifter.dump.markov_dict import bot_markov_chain
-        output = bot_markov_chain(data, args)
+        output = json.dumps(
+            bot_markov_chain(data, args),
+            ensure_ascii=False)
     
     args.outfile.writelines(output)
 

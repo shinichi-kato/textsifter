@@ -87,9 +87,9 @@ def morpho(text, term_json):
 
 def join_suffix(nodeslist):
     text = []
-    buff = None
     for nodes in nodeslist:
         line = []
+        buff = []
         for node in nodes:
             if node.pos.startswith('接尾辞'):
                 if buff:
@@ -142,9 +142,9 @@ def join_kakujoshi(nodeslist):
         とする。なお、join_kakujoshiはlex/concept.pyに吸収予定            """
     
     text = []
-    buff = None
     for nodes in nodeslist:
         line = []
+        buff = None
         for node in nodes:
             if node.pos == '助詞-格助詞':
                 if buff:

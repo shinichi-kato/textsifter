@@ -12,7 +12,8 @@ class TestTagger(unittest.TestCase):
 
         with open('tests/term.json') as f:
             data = preprocess.morpho(data,f)
-            # data = preprocess.join_suffix(data)
+            data = preprocess.join_suffix(data)
+            data = preprocess.join_ppa(data)
         
         pp = pprint.PrettyPrinter()
         with open('tests/result.txt', 'wt') as f:

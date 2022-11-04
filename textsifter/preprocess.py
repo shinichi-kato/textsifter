@@ -111,6 +111,34 @@ def join_suffix(nodeslist):
     return text
 
 
+def join_ppa(nodeslist):
+    """ 「なの」のように助動詞→助詞の遷移を一つのノードに再結合する """
+    text = []
+    for nodes in nodeslist:
+        line = []
+        buff = None
+        for node in nodes:
+            if node.pos.startswith('助'):
+                if buff:
+                    if buff.pos.startswith('助'):
+                        line.append(
+                            Node(
+                                surface=f'{buff.surface}{node.surface}',
+                                pos=f'{buff.pos} {node.pos}',
+                                factor=_merge_suffix(buff.factor, node.factor)
+                            )
+                        )
+                        buff = None
+                        continue
+            if buff:
+                line.append(buff)
+            buff = node
+        if buff:
+            line.append(buff)
+        text.append(line)
+    
+    return text
+
 def _merge_suffix(node_factor, suffix_factor):
     """ node_factorにsuffix_factorを結合した新しいfactorを返す。
         (小型,) (化,) → (小型化,)

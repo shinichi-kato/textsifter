@@ -125,6 +125,7 @@ def main():
     if args.fix_fragment:
         data = preprocess.join_suffix(data)
         data = preprocess.join_kakujoshi(data)
+        data = preprocess.join_ppa(data)
     
     if args.filter_nva:
         data = preprocess.filter_nva(data)

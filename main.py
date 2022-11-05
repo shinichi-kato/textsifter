@@ -98,8 +98,8 @@ def main():
                                         help='ファイル出力')
     parser_dump.add_argument('outfile', nargs='?', type=argparse.FileType('w'), default=sys.stdout,
                              help="出力ファイルのパス(省略時は標準出力)")
-    parser_dump.add_argument('-f', '--format', choices=['surface', 'feature'], default='surface',
-                             help='surface:表層語彙を出力, feature:"表層語彙(品詞)"を出力')
+    parser_dump.add_argument('-f', '--format', choices=['surface', 'feature', 'text'], default='surface',
+                             help='surface:表層語彙を出力, feature:"表層語彙(品詞)", text:マルコフ連鎖から生成したテキストを出力')
     parser_dump.add_argument('-s', '--separator', choices=['comma', 'space'], default='space',
                              help="出力をの区切り文字を指定(省略時はスペース区切り)")
     parser_dump.set_defaults(subcommand_func=dump)

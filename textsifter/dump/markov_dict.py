@@ -4,6 +4,7 @@
 """
 import os
 from collections import defaultdict
+from random import choice
 
 
 def bot_markov_chain(nodeslist, args):
@@ -41,7 +42,7 @@ def bot_markov_chain(nodeslist, args):
     def feature_extractor(node):
         return f'{node.surface}({node.pos})'
 
-    if args.format == 'surface':
+    if args.format in {'surface','text'}:
         extractor = surface_extractor
     elif args.format == 'feature':
         extractor = feature_extractor
@@ -86,12 +87,19 @@ def bot_markov_chain(nodeslist, args):
         else:
             new_chain[key] = chain[key]
 
+    if args.format == 'text':
+        return to_text(chain)
+    else:
+        return to_dict(header, new_chain)
+
+
+def to_dict(header, chain):
     """ チャットボット辞書に変換 """
     """ タグでないinに番号を割り当てる """
 
     index = 0
     index_dict = {}
-    for key in new_chain.keys():
+    for key in chain.keys():
         if not key.startswith('{') or not key.endswith('}'):
             index_dict[key] = index
             index += 1
@@ -100,7 +108,7 @@ def bot_markov_chain(nodeslist, args):
         keyの"理由を"→"{name_node0}"に変換          """
 
     script = []
-    for key, values in new_chain.items():
+    for key, values in chain.items():
         outs = []
         for value in values:
             if value in index_dict:
@@ -118,3 +126,15 @@ def bot_markov_chain(nodeslist, args):
         script.append({'in': ins, 'out': outs})
 
     return script
+
+
+def to_text(chain):
+    
+    buff = []
+    cur = choice(chain['{start}'])
+
+    while len(chain[cur]) != 0:
+        cur = choice(chain[cur])
+        buff.append(cur)
+
+    return "".join(buff)        

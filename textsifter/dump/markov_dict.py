@@ -36,16 +36,13 @@ def bot_markov_chain(nodeslist, args):
     chain = defaultdict(list)
     extractor = None
 
-    def surface_extractor(node):
-        return node.surface
 
-    def feature_extractor(node):
-        return f'{node.surface}({node.pos})'
-
-    if args.format in {'surface','text'}:
-        extractor = surface_extractor
+    if args.format in 'surface':
+        extractor = lambda n: n.surface
     elif args.format == 'feature':
-        extractor = feature_extractor
+        extractor = lambda n: f'{n.surface}({n.pos})'
+    elif args.format == 'text': 
+        extractor = lambda n: n
 
     header = args.source[0]
     header = os.path.splitext(os.path.basename(header))[0]
@@ -135,6 +132,6 @@ def to_text(chain):
 
     while len(chain[cur]) != 0:
         cur = choice(chain[cur])
-        buff.append(cur)
+        buff.append(cur.surface)
 
     return "".join(buff)        

@@ -8,6 +8,7 @@ import sys
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib
+import numpy as np
 
 matplotlib.use('TkAgg')
 
@@ -49,7 +50,9 @@ def graph(data):
     node_size = nx.get_node_attributes(G, "size")
     node_size = [node_size[n]*50 for n in node_keys]
     node_color = nx.degree_centrality(G)
-    node_color = [(node_color[n]**0.5)*20+20 for n in node_keys]
+    node_color = np.array(
+        [(node_color[n]**0.5)*20+20 for n in node_keys],
+        dtype=float)
 
     nx.draw_networkx_nodes(
         G, pos,
@@ -66,6 +69,10 @@ def graph(data):
         G, pos,
         font_family="Noto Sans CJK JP",
     )
+    sm = plt.cm.ScalarMappable(cmap=plt.cm.summer,
+                                   norm=plt.Normalize(vmin=node_color.min(), vmax=node_color.max()))
+    sm.set_array([])
+    plt.colorbar(sm, label="全nodeにおける次数")
     plt.axis("off")
     plt.show()
 
@@ -89,10 +96,12 @@ def chr1gram(file):
         }
     """
     vocab = defaultdict(list)
-    prev = "\f"
+
     for line in file:
-        for c in line:
-            vocab[prev].append(c)
+        prev = None
+        for c in line.rstrip():
+            if prev:
+                vocab[prev].append(c)
             prev = c
 
     print(json.dumps(vocab, ensure_ascii=False))

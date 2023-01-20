@@ -28,6 +28,11 @@ Node = namedtuple('Node', ['surface', 'pos', 'factor'])
 RE_TAG_BODY = re.compile(r'^([0-9]+)\t(.*)?$')
 tagger = MeCab.Tagger()
 
+DI_PRONOUN = {
+    '{I}': {'私','僕'},
+    '{YOU}': {'君','あなた'},
+}
+
 
 def morpho(text, term_json):
     """ テキストを読んでterm_jsonで定義された単語をNodeに変換し、
@@ -62,6 +67,7 @@ def morpho(text, term_json):
 
     nodeslist = []
 
+    """ termを一つのノードに """
     for line in text:
         # phase1 - 対象単語を「\f[i}\t」に置換
         for term in di_terms:
@@ -82,6 +88,28 @@ def morpho(text, term_json):
                 elems.extend(_segment(e))
 
         nodeslist.append(elems)
+    
+    return nodeslist
+
+
+def pronoun(nodeslist):
+    """ 代名詞をタグ化 """
+    """ DI_PRONOUNから中間辞書を生成 """
+    pronouns = {}
+    for key, vals in DI_PRONOUN.items():
+        for val in vals:
+            pronouns[val] = key
+
+    """ 置換 """
+    text = []
+    for line in nodeslist:
+        for node in line:
+            if node.pos == '代名詞':
+                if node.surface in pronouns:
+                    node.surface = pronouns[node.surface]
+                else:
+                    print(f"{node.surface}が代名詞辞書にありません")
+    
     return nodeslist
 
 

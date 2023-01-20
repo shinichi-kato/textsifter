@@ -47,15 +47,19 @@ def plot(data, args):
 
 def dump(data, args):
     output = []
-    if args.mode=='cooccurrence':
-        from textsifter.dump.cooc_mtx import cooccurrence_matrix
-        output = cooccurrence_matrix(data,args)
-    if args.mode == 'markov':
-        from textsifter.dump.markov_dict import bot_markov_chain
-        output = json.dumps(
-            bot_markov_chain(data, args),
-            ensure_ascii=False)
-    
+    match args.mode:
+        case 'cooccurrence':
+            from textsifter.dump.cooc_mtx import cooccurrence_matrix
+            output = cooccurrence_matrix(data, args)
+        case 'markov':
+            from textsifter.dump.markov_dict import bot_markov_chain
+            output = json.dumps(
+                bot_markov_chain(data, args),
+                ensure_ascii=False)
+        case 'log2script':
+            from textsifter.dump.log2script import log2script
+            output = log2script(data, args)
+
     args.outfile.writelines(output)
 
 
@@ -80,8 +84,8 @@ def main():
                         help='前処理: 名詞,動詞,形容詞,形状詞のみを残す。')
     parser.add_argument('-s', '--stopword', type=str,
                         help='前処理: 指定した語句を解析から除外する。STOPWORDには除外する形態素の表層形を一行一つ記載する')
-    parser.add_argument('--mode', choices=['markov', 'cooccurrence'], default='cooccurrence',
-                        help='markov:マルコフ連鎖, cooccurrence:共起性を計算します')
+    parser.add_argument('--mode', choices=['markov', 'cooccurrence', 'log2script'], default='cooccurrence',
+                        help='markov:マルコフ連鎖, cooccurrence:共起性を計算します, log2script:ログファイルをスクリプトに変換します')
 
     subparsers = parser.add_subparsers()
 
@@ -106,8 +110,10 @@ def main():
 
     args = parser.parse_args()
 
-    mode = "マルコフ連鎖" if args.mode == 'markov' else "共起性"
-    print(f"{mode}を計算します。")
+    if args.mode == 'markov':
+        print("マルコフ連鎖を計算します")
+    elif args.mode == 'cooccurrence':
+        print('共起性を計算します')
 
     # sourceが複数ファイルなら一ファイルを一行にまとめる
 
@@ -126,7 +132,7 @@ def main():
         data = preprocess.join_suffix(data)
         data = preprocess.join_kakujoshi(data)
         data = preprocess.join_ppa(data)
-    
+
     if args.filter_nva:
         data = preprocess.filter_nva(data)
 

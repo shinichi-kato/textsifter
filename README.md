@@ -12,7 +12,7 @@
 
 ### Prerequisities
 
-* python 3.8
+* python 3.8以上
 
 ### Installing
 
@@ -62,6 +62,12 @@ $ ./textsifter テキストファイル, [テキストファイル,...] [前処�
 
 ■ 助詞を分離しない
 日本語では「犬が好き」「ネコが好き」のように
+
+### チャットボット用ログ型辞書の生成
+[J-TOCC](http://nakamata.info/database/)の形式に対応しています。
+```
+$ ./sifter --mode log2script <ログのテキストファイル> > 出力先(json)
+```
 
 ## 作者
 加藤真一

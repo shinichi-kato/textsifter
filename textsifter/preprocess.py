@@ -22,16 +22,14 @@ from collections import namedtuple
 import MeCab
 import json
 import re
+import sys
+
+from . import DI_PRONOUN
 
 
 Node = namedtuple('Node', ['surface', 'pos', 'factor'])
 RE_TAG_BODY = re.compile(r'^([0-9]+)\t(.*)?$')
 tagger = MeCab.Tagger()
-
-DI_PRONOUN = {
-    '{I}': {'私','僕'},
-    '{YOU}': {'君','あなた'},
-}
 
 
 def morpho(text, term_json):
@@ -89,11 +87,11 @@ def morpho(text, term_json):
 
         nodeslist.append(elems)
     
-    return nodeslist
+    return pronoun(nodeslist)
 
 
 def pronoun(nodeslist):
-    """ 代名詞をタグ化 """
+    """ 代名詞はposを{I}{YOU}などに変える """
     """ DI_PRONOUNから中間辞書を生成 """
     pronouns = {}
     for key, vals in DI_PRONOUN.items():
@@ -102,15 +100,26 @@ def pronoun(nodeslist):
 
     """ 置換 """
     text = []
-    for line in nodeslist:
-        for node in line:
+    for nodes in nodeslist:
+        line = []
+        for node in nodes:
             if node.pos == '代名詞':
                 if node.surface in pronouns:
-                    node.surface = pronouns[node.surface]
+                    line.append(Node(
+                        node.surface,
+                        pronouns[node.surface],
+                        node.factor))
                 else:
-                    print(f"{node.surface}が代名詞辞書にありません")
+                    line.append(node)
+                    print(
+                        f"「{node.surface}」が代名詞辞書にありません",
+                        file=sys.stderr
+                        )
+            else:
+                line.append(node)
+        text.append(line)
     
-    return nodeslist
+    return text
 
 
 def join_suffix(nodeslist):

@@ -136,7 +136,7 @@ def main():
     if args.filter_nva:
         data = preprocess.filter_nva(data)
 
-    if args.subcommand_func:
+    if 'subcommand_func' in args:
         args.subcommand_func(data, args)
     else:
         parser.print_help()

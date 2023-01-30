@@ -24,11 +24,14 @@ SETTINGS_TEMPLATE = {
     "avatarDir": "",  # biomeセルでは利用しない
     "backgroundColor": "",  # biomeセルでは利用しない
     "encoder": "LogEncoder",
-    "stateMachine": "BasicStateMachine",
+    "stateMachine": "EnterlessStateMachine",
     "decoder": "HarvestDecoder",
     "precision": 0.5,
     "retention": 0.7,
-    "refractory": 3,
+    "convolution": 0.3,
+    "memory": {
+        "{BOT_NAME}":["アルファ"],
+    },
     "biome": [],
     "script": []
 }
@@ -83,6 +86,7 @@ def log2script(data, args):
     today = datetime.datetime.today()
     today = today.strftime('%Y/%m/%d %H:%M:%S')
     SETTINGS_TEMPLATE['updatedAt'] = today
+    SETTINGS_TEMPLATE['memory'] = {k:list(v) for k,v in DI_PRONOUN}
     SETTINGS_TEMPLATE['script'] = script
 
     settings = json.dumps(SETTINGS_TEMPLATE, ensure_ascii=False)
